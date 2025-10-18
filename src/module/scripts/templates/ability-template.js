@@ -1,20 +1,27 @@
-import { ANGLE_ORIGIN, ANGLE_POINTS, CONSTS, MODULE_NAME, PLACEMENT_TYPE, ROTATION_TYPE } from '../../consts';
-import { Settings } from '../../settings';
-import HintHandler from '../../view/hint-handler';
-import { GridSquare } from '../models/grid-square';
-import { localize, localizeFull } from '../utils';
-import { MeasuredTemplatePFAdvanced } from './measured-template-pf-advanced';
+import { ANGLE_ORIGIN, ANGLE_POINTS, CONSTS, MODULE_NAME, PLACEMENT_TYPE, ROTATION_TYPE } from "../../consts";
+import { Settings } from "../../settings";
+import HintHandler from "../../view/hint-handler";
+import { GridSquare } from "../models/grid-square";
+import { localize, localizeFull } from "../utils";
+import { MeasuredTemplatePFAdvanced } from "./measured-template-pf-advanced";
 
 export class AbilityTemplateAdvanced extends MeasuredTemplatePFAdvanced {
-
     static RENDER_THROTTLE = 30;
 
-    get angleOrigin() { return ANGLE_ORIGIN.NONE; }
-    get angleStartPoints() { return ANGLE_POINTS.ALL; }
+    get angleOrigin() {
+        return ANGLE_ORIGIN.NONE;
+    }
+    get angleStartPoints() {
+        return ANGLE_POINTS.ALL;
+    }
 
-    get placementType() { return PLACEMENT_TYPE.SET_XY; }
+    get placementType() {
+        return PLACEMENT_TYPE.SET_XY;
+    }
 
-    get selectOriginText() { return ''; }
+    get selectOriginText() {
+        return "";
+    }
 
     #lastMove = 0;
     #isDrag = false;
@@ -53,10 +60,7 @@ export class AbilityTemplateAdvanced extends MeasuredTemplatePFAdvanced {
 
     static async fromData(templateData, { action } = {}) {
         const { t: type, distance } = templateData;
-        if (!type
-            || !distance
-            || !canvas.scene
-        ) {
+        if (!type || !distance || !canvas.scene) {
             return null;
         }
 
@@ -68,7 +72,7 @@ export class AbilityTemplateAdvanced extends MeasuredTemplatePFAdvanced {
         /** @type {typeof MeasuredTemplatePFAdvanced}  */
         let abilityCls;
         switch (type) {
-            case 'circle':
+            case "circle":
                 switch (placementType) {
                     case CONSTS.placement.circle.self:
                         abilityCls = !!token
@@ -87,7 +91,7 @@ export class AbilityTemplateAdvanced extends MeasuredTemplatePFAdvanced {
                         break;
                 }
                 break;
-            case 'cone':
+            case "cone":
                 switch (placementType) {
                     case CONSTS.placement.cone.selectTargetSquare:
                         abilityCls = game.modules.get(MODULE_NAME).api.ability.cones.ConeFromTargetSquare;
@@ -103,8 +107,8 @@ export class AbilityTemplateAdvanced extends MeasuredTemplatePFAdvanced {
                         break;
                 }
                 break;
-            case 'ray':
-            case 'line':
+            case "ray":
+            case "line":
                 switch (placementType) {
                     case CONSTS.placement.line.selectTargetSquare:
                         abilityCls = game.modules.get(MODULE_NAME).api.ability.lines.LineFromSquare;
@@ -120,13 +124,12 @@ export class AbilityTemplateAdvanced extends MeasuredTemplatePFAdvanced {
                         break;
                 }
                 break;
-            case 'rect':
+            case "rect":
                 if (canvas.scene.grid.type === CONST.GRID_TYPES.SQUARE) {
                     abilityCls = game.modules.get(MODULE_NAME).api.ability.rects.RectCentered;
-                }
-                else {
+                } else {
                     // rotating rects is too hard, so "cheat" and change it to a line that can be rotated with the mouse wheel
-                    templateData.t = 'ray';
+                    templateData.t = "ray";
                     templateData.width = distance;
                     abilityCls = game.modules.get(MODULE_NAME).api.ability.lines.LineSystem;
                 }
@@ -194,7 +197,7 @@ export class AbilityTemplateAdvanced extends MeasuredTemplatePFAdvanced {
         this.document.direction = direction;
 
         if (this._isSelectingOrigin) {
-            HintHandler.show({ title: localize('cone'), hint: localize('hints.chooseStart') });
+            HintHandler.show({ title: localize("cone"), hint: localize("hints.chooseStart") });
             // todo this is getting overridden when moving
             this._controlIconTextContents.push(this.selectOriginText);
         }
@@ -204,22 +207,20 @@ export class AbilityTemplateAdvanced extends MeasuredTemplatePFAdvanced {
 
     clearTargetIfEnabled() {
         if (Settings.target) {
-            game.user.updateTokenTargets();
+            game.user._onUpdateTokenTargets();
         }
     }
 
     async targetIfEnabled(force = false) {
         if (this._isSelectingOrigin) return;
 
-        if (!force
-            && canvas.scene.grid.type !== CONST.GRID_TYPES.SQUARE
-            && ['line', 'ray'].includes(this.document.t)
-        ) return;
+        if (!force && canvas.scene.grid.type !== CONST.GRID_TYPES.SQUARE && ["line", "ray"].includes(this.document.t))
+            return;
 
         if (Settings.target && !this._isSelectingOrigin) {
             const targets = await this.getTokensWithin();
             const ids = targets.map((t) => t.id);
-            game.user.updateTokenTargets(ids);
+            game.user._onUpdateTokenTargets(ids);
         }
     }
 
@@ -262,17 +263,17 @@ export class AbilityTemplateAdvanced extends MeasuredTemplatePFAdvanced {
             canvas.app.view.addEventListener("wheel", this.#events.rotate);
 
             this.tempDrag = canvas.templates._onDragLeftStart;
-            canvas.templates._onDragLeftStart = () => { };
+            canvas.templates._onDragLeftStart = () => {};
             this.tempCancel = canvas.templates._onDragLeftCancel;
-            canvas.templates._onDragLeftCancel = () => { };
+            canvas.templates._onDragLeftCancel = () => {};
             this.tempMove = canvas.templates._onDragLeftMove;
-            canvas.templates._onDragLeftMove = () => { };
+            canvas.templates._onDragLeftMove = () => {};
             this.tempDrop = canvas.templates._onDragLeftDrop;
-            canvas.templates._onDragLeftDrop = () => { };
+            canvas.templates._onDragLeftDrop = () => {};
             this.tempLeft = canvas.templates._onClickLeft;
-            canvas.templates._onClickLeft = () => { };
+            canvas.templates._onClickLeft = () => {};
             this.tempLeft2 = canvas.templates._onClickLeft2;
-            canvas.templates._onClickLeft2 = () => { };
+            canvas.templates._onClickLeft2 = () => {};
         });
     }
 
@@ -294,25 +295,28 @@ export class AbilityTemplateAdvanced extends MeasuredTemplatePFAdvanced {
     async handleRangeAndTargeting() {
         this.#isInRange = true;
 
-        if (this.placementType === PLACEMENT_TYPE.SET_XY
-            && (this.hasMaxRange || this.hasMinRange)
-            && !this.document.flags[MODULE_NAME].ignoreRange
-            && this.token
+        if (
+            this.placementType === PLACEMENT_TYPE.SET_XY &&
+            (this.hasMaxRange || this.hasMinRange) &&
+            !this.document.flags[MODULE_NAME].ignoreRange &&
+            this.token
         ) {
             const sourceSquare = GridSquare.fromToken(this.token);
             const range = sourceSquare.distanceToPoint(this.center);
 
-            this.#isInRange = !(this.hasMinRange && range < this.minRange
-                || this.hasMaxRange && range > this.maxRange);
+            this.#isInRange = !(
+                (this.hasMinRange && range < this.minRange) ||
+                (this.hasMaxRange && range > this.maxRange)
+            );
 
-            const unit = game.settings.get('pf1', 'units') === 'imperial'
-                ? localizeFull('PF1.Distance.ftShort')
-                : localizeFull('PF1.Distance.mShort');
-            this._controlIconTextRangeContents = !range && this._isSelectingOrigin
-                ? []
-                : [localize('range', { range, unit })];
+            const unit =
+                game.settings.get("pf1", "units") === "imperial"
+                    ? localizeFull("PF1.Distance.ftShort")
+                    : localizeFull("PF1.Distance.mShort");
+            this._controlIconTextRangeContents =
+                !range && this._isSelectingOrigin ? [] : [localize("range", { range, unit })];
             if (!this.#isInRange) {
-                this._controlIconTextRangeContents.push(localize('errors.outOfRange'));
+                this._controlIconTextRangeContents.push(localize("errors.outOfRange"));
             }
         }
 
@@ -320,24 +324,20 @@ export class AbilityTemplateAdvanced extends MeasuredTemplatePFAdvanced {
         this._setErrorIconVisibility(this.#isInRange);
 
         // todo handled for gridless lines
-        this.#isInRange
-            ? await this.targetIfEnabled()
-            : this.clearTargetIfEnabled();
+        this.#isInRange ? await this.targetIfEnabled() : this.clearTargetIfEnabled();
     }
 
     #getTokenEdgeForPoint() {
         if (!this.token) return { ...canvas.mousePosition, direction: 0 };
 
         const radToNormalizedAngle = (rad) => {
-            const angle = (rad * 180 / Math.PI) % 360;
-            return angle < 0
-                ? angle + 360
-                : angle;
+            const angle = ((rad * 180) / Math.PI) % 360;
+            return angle < 0 ? angle + 360 : angle;
         };
         const ray = new Ray(this.token.center, canvas.mousePosition);
         const direction = radToNormalizedAngle(ray.angle);
-        const x = Math.cos(ray.angle) * this.token.w / 2 + this.token.center.x;
-        const y = Math.sin(ray.angle) * this.token.h / 2 + this.token.center.y;
+        const x = (Math.cos(ray.angle) * this.token.w) / 2 + this.token.center.x;
+        const y = (Math.sin(ray.angle) * this.token.h) / 2 + this.token.center.y;
         return { x, y, direction };
     }
 
@@ -364,9 +364,10 @@ export class AbilityTemplateAdvanced extends MeasuredTemplatePFAdvanced {
             this.document.x = pos.x;
             this.document.y = pos.y;
         } else if (this.placementType === PLACEMENT_TYPE.SET_XY_FROM_TOKEN) {
-            const tokenEdgePos = canvas.scene.grid.type === CONST.GRID_TYPES.SQUARE
-                ? this._gridSquare.getFollowPositionForCoords(this.angleStartPoints, pos)
-                : this.#getTokenEdgeForPoint();
+            const tokenEdgePos =
+                canvas.scene.grid.type === CONST.GRID_TYPES.SQUARE
+                    ? this._gridSquare.getFollowPositionForCoords(this.angleStartPoints, pos)
+                    : this.#getTokenEdgeForPoint();
             this.document.x = tokenEdgePos.x;
             this.document.y = tokenEdgePos.y;
             this.document.direction = tokenEdgePos.direction;
@@ -377,7 +378,7 @@ export class AbilityTemplateAdvanced extends MeasuredTemplatePFAdvanced {
         } else if (this.placementType === PLACEMENT_TYPE.SET_ANGLE) {
             this._followAngle(pos);
         } else {
-            throw new Error('this should never be reached');
+            throw new Error("this should never be reached");
         }
 
         await this.handleRangeAndTargeting();
@@ -400,12 +401,10 @@ export class AbilityTemplateAdvanced extends MeasuredTemplatePFAdvanced {
             return this.#isGridPoint({ x, y })
                 ? GridSquare.fromGridPoint({ x, y })
                 : GridSquare.fromGridSquare({ x, y });
-        }
-        else if (this.angleOrigin === ANGLE_ORIGIN.TOKEN) {
+        } else if (this.angleOrigin === ANGLE_ORIGIN.TOKEN) {
             return GridSquare.fromToken(this.token);
-        }
-        else {
-            throw new Error('this should never happen');
+        } else {
+            throw new Error("this should never happen");
         }
     }
 
@@ -454,7 +453,9 @@ export class AbilityTemplateAdvanced extends MeasuredTemplatePFAdvanced {
     }
 
     /** so individual templates can finalize their own variables */
-    _finalizeTemplate() { return true; }
+    _finalizeTemplate() {
+        return true;
+    }
 
     /** @type {GridSquare} */
     _gridSquare = null;
@@ -470,7 +471,7 @@ export class AbilityTemplateAdvanced extends MeasuredTemplatePFAdvanced {
         }
 
         if (!this.#isInRange && !this.document.flags[MODULE_NAME].ignoreRange) {
-            const message = localize('errors.outOfRange');
+            const message = localize("errors.outOfRange");
             ui.notifications.error(message);
             this._onFinish(event);
             return this.#events.reject();
@@ -486,7 +487,6 @@ export class AbilityTemplateAdvanced extends MeasuredTemplatePFAdvanced {
         }
 
         console.debug("PF1 | Placing template for", this.action?.item?.name ?? "unknown");
-
 
         // Reject if template size is zero
         if (!this.document.distance) {
@@ -530,14 +530,16 @@ export class AbilityTemplateAdvanced extends MeasuredTemplatePFAdvanced {
             texture: this.document.texture,
             width: this.document.width,
             x: this.document.x,
-            y: this.document.y
+            y: this.document.y,
         });
         const doc = (await canvas.scene.createEmbeddedDocuments("MeasuredTemplate", [this.document.toObject()]))[0];
         this.document = doc;
         return doc;
     }
 
-    get _rotationType() { return ROTATION_TYPE.ADVANCED_TEMPLATES; }
+    get _rotationType() {
+        return ROTATION_TYPE.ADVANCED_TEMPLATES;
+    }
 
     /**
      * @param {Event} event
@@ -550,8 +552,7 @@ export class AbilityTemplateAdvanced extends MeasuredTemplatePFAdvanced {
 
         if (this._rotationType === ROTATION_TYPE.SYSTEM) {
             this.#systemRotation(event);
-        }
-        else if (this._rotationType === ROTATION_TYPE.ADVANCED_TEMPLATES) {
+        } else if (this._rotationType === ROTATION_TYPE.ADVANCED_TEMPLATES) {
             this.#advancedTemplatesRotation(event);
         }
 
@@ -602,7 +603,7 @@ export class AbilityTemplateAdvanced extends MeasuredTemplatePFAdvanced {
         const snap = Settings.coneRotation;
         if (!snap) return;
 
-        const offset = snap * Math.sign(event.deltaY)
+        const offset = snap * Math.sign(event.deltaY);
         this.#directionOffset += offset;
 
         let { direction } = this.document;

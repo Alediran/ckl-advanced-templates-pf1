@@ -17,17 +17,13 @@ const targetTokens = (template) => {
         return centers;
     };
     const centers = canvas.tokens.placeables
-        .map((t) => t.actor.data.data.size <= 4
-            ? { id: t.id, center: t.center }
-            : getCenterOfSquares(t))
+        .map((t) => (t.actor.data.data.size <= 4 ? { id: t.id, center: t.center } : getCenterOfSquares(t)))
         .flatMap((x) => x);
-    const tokenIdsToTarget = centers.filter((o) =>
-        canvas
-            .grid.getHighlightLayer(template.highlightId)
-            .geometry.containsPoint(o.center))
+    const tokenIdsToTarget = centers
+        .filter((o) => canvas.grid.getHighlightLayer(template.highlightId).geometry.containsPoint(o.center))
         .map((x) => x.id);
 
-    game.user.updateTokenTargets(tokenIdsToTarget);
+    game.user._onUpdateTokenTargets(tokenIdsToTarget);
 };
 
 export { targetTokens };
