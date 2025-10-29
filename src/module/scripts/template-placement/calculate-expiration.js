@@ -15,7 +15,7 @@ export const calculateExpiration = (rollData = {}, flags = {}) => {
             };
         case CONSTS.deletionOptions.timespan:
             let units = flags[CONSTS.flags.deletionUnit] || 0;
-            units = !isNaN(+units) ? +units : units;
+            units = !isNaN(+units) ? +units : RollPF.safeRoll(units, rollData)._total;
             const interval = flags[CONSTS.flags.deletionInterval] || CONSTS.deletionIntervals.rounds;
 
             const duration = (() => {

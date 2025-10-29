@@ -159,8 +159,10 @@ async function promptMeasureTemplate() {
 
 export { addSkipRangeToDialog, promptMeasureTemplate };
 
-const _getSize = (shared) => pf1.utils.convertDistance(shared.action.measureTemplate.size)[0];
-const _getHeight = (shared, distance) => pf1.utils.convertDistance(distance)[0];
+const _getSize = (shared) =>
+    pf1.utils.convertDistance(RollPF.safeRollSync(shared.action.measureTemplate.size, shared.rollData)._total)[0];
+const _getHeight = (shared, distance) =>
+    pf1.utils.convertDistance(RollPF.safeRollSync(distance, shared.rollData)._total)[0];
 
 const hasTemplatePermission = () => game.permissions.TEMPLATE_CREATE.includes(game.user.role);
 
