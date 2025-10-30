@@ -1,37 +1,39 @@
-import { CONSTS, MODULE_NAME } from "../../consts";
-import { getToken, ifDebug, localize } from "../utils";
-import { Settings } from "../../settings";
-import { calculateExpiration } from "./calculate-expiration";
+import { CONSTS, MODULE_NAME } from '../../consts';
+import { getToken, ifDebug, localize } from '../utils';
+import { Settings } from '../../settings';
+import { calculateExpiration } from './calculate-expiration';
 
-const ignoreRangeKey = "ignore-range";
+const ignoreRangeKey = 'ignore-range';
 const addSkipRangeToDialog = (application, [html], data) => {
-    if (application instanceof pf1.applications.AttackDialog && !!data.action.measureTemplate?.type) {
-        const form = html.closest("form") || html.querySelector("form");
+    if (application instanceof pf1.applications.AttackDialog
+        && !!data.action.measureTemplate?.type
+    ) {
+        const form = html.closest('form') || html.querySelector('form');
         if (!form) {
             return;
         }
 
-        const container = document.createElement("div");
-        container.classList.add("form-group", "stacked", "flags", "advanced-templates");
+        const container = document.createElement('div');
+        container.classList.add('form-group', 'stacked', 'flags', 'advanced-templates');
 
         {
             // container label
-            const label = document.createElement("label");
-            label.innerText = localize("advanced-templates");
+            const label = document.createElement('label');
+            label.innerText = localize('advanced-templates');
             container.appendChild(label);
         }
 
         {
             // ignore range checkbox
-            const label = document.createElement("label");
-            label.classList.add("checkbox");
+            const label = document.createElement('label');
+            label.classList.add('checkbox');
 
             /** @type {HTMLInputElement} */
-            const input = document.createElement("input");
-            input.setAttribute("type", "checkbox");
-            input.setAttribute("name", ignoreRangeKey);
+            const input = document.createElement('input');
+            input.setAttribute('type', 'checkbox');
+            input.setAttribute('name', ignoreRangeKey);
             input.checked = !!trackedApps.get(application.appId);
-            input.addEventListener("change", function () {
+            input.addEventListener('change', function () {
                 if (this.checked) {
                     track(application.appId);
                 } else {
@@ -39,7 +41,7 @@ const addSkipRangeToDialog = (application, [html], data) => {
                 }
             });
 
-            label.textContent = ` ${localize("templates.ignoreRange")} `;
+            label.textContent = ` ${localize('templates.ignoreRange')} `;
             label.insertBefore(input, label.firstChild);
             container.appendChild(label);
         }
@@ -47,18 +49,17 @@ const addSkipRangeToDialog = (application, [html], data) => {
         form.lastElementChild.before(container);
         application.setPosition();
     }
-};
+}
 
 const trackedApps = new Map();
 const track = (id) => {
     trackedApps.set(id, true);
 
     // remove any tracked ids that are no longer present
-    trackedApps
-        .keys()
+    trackedApps.keys()
         .filter((key) => !ui.windows[key])
         .forEach(untrack);
-};
+}
 const untrack = (id) => trackedApps.delete(id);
 
 let placingTemplate = false;
@@ -72,15 +73,15 @@ let placingTemplate = false;
  * @returns {object} The template creation data
  */
 async function promptMeasureTemplate() {
-    ifDebug(() => console.log("promptMeasureTemplate", this));
+    ifDebug(() => console.log('promptMeasureTemplate', this));
 
     if (placingTemplate) return null;
 
     // return success early if user isn't allowed to place templates
     if (!hasTemplatePermission()) {
         return {
-            delete: () => {},
-            place: () => {},
+            delete: () => { },
+            place: () => { },
             result: true,
         };
     }
@@ -88,12 +89,13 @@ async function promptMeasureTemplate() {
     const type = this.shared.action.measureTemplate.type;
 
     const token = getToken(this.item) || {};
-    const icon =
-        this.shared.action.img === "systems/pf1/icons/misc/magic-swirl.png" ? this.item.img : this.shared.action.img;
+    const icon = this.shared.action.img === 'systems/pf1/icons/misc/magic-swirl.png' ? this.item.img : this.shared.action.img;
     let { maxRange, minRange } = this.shared.action;
     const flags = this.shared.action.flags?.[MODULE_NAME] || {};
     let distance = _getSize(this.shared) || 5;
-    let height = flags[CONSTS.flags.rect.height] ? _getHeight(this.shared, flags[CONSTS.flags.rect.height]) : distance;
+    let height = flags[CONSTS.flags.rect.height]
+        ? _getHeight(this.shared, flags[CONSTS.flags.rect.height])
+        : distance;
 
     const expirationTime = calculateExpiration(this.shared.rollData, flags);
 
@@ -104,9 +106,7 @@ async function promptMeasureTemplate() {
         flags: {
             [MODULE_NAME]: {
                 ...flags,
-                [CONSTS.flags.circle.movesWithToken]:
-                    flags[CONSTS.flags.placementType] === CONSTS.placement.circle.self &&
-                    !!flags[CONSTS.flags.circle.movesWithToken],
+                [CONSTS.flags.circle.movesWithToken]: flags[CONSTS.flags.placementType] === CONSTS.placement.circle.self && !!flags[CONSTS.flags.circle.movesWithToken],
                 [CONSTS.flags.expirationTime]: expirationTime,
                 [CONSTS.flags.ignoreRange]: flags[CONSTS.flags.ignoreRange] || !!this.formData[ignoreRangeKey],
                 [CONSTS.flags.rect.height]: height,
@@ -122,9 +122,8 @@ async function promptMeasureTemplate() {
         texture: this.shared.action.measureTemplate.texture || null,
     };
 
-    if (["ray", "line"].includes(type)) {
-        templateData.width =
-            (flags[CONSTS.flags.line.widthOverride] && flags[CONSTS.flags.line.width]) || Settings.defaultLineWidth;
+    if (['ray', 'line'].includes(type)) {
+        templateData.width = flags[CONSTS.flags.line.widthOverride] && flags[CONSTS.flags.line.width] || Settings.defaultLineWidth;
     }
 
     const windows = Object.values(ui.windows).filter((x) => !!x.minimize && !x._minimized && !isSimpleCalender(x));
@@ -140,7 +139,8 @@ async function promptMeasureTemplate() {
     let result = null;
     try {
         result = await template.drawPreview().catch((e) => null);
-    } catch {}
+    }
+    catch { }
     placingTemplate = false;
 
     if (!result) {
@@ -157,12 +157,13 @@ async function promptMeasureTemplate() {
     return result;
 }
 
-export { addSkipRangeToDialog, promptMeasureTemplate };
+export {
+    addSkipRangeToDialog,
+    promptMeasureTemplate,
+};
 
-const _getSize = (shared) =>
-    pf1.utils.convertDistance(RollPF.safeRollSync(shared.action.measureTemplate.size, shared.rollData)._total)[0];
-const _getHeight = (shared, distance) =>
-    pf1.utils.convertDistance(RollPF.safeRollSync(distance, shared.rollData)._total)[0];
+const _getSize = (shared) => pf1.utils.convertDistance(RollPF.safeRollSync(shared.action.measureTemplate.size, shared.rollData)._total)[0];
+const _getHeight = (shared, distance) => pf1.utils.convertDistance(RollPF.safeRollSync(distance, shared.rollData)._total)[0];
 
 const hasTemplatePermission = () => game.permissions.TEMPLATE_CREATE.includes(game.user.role);
 

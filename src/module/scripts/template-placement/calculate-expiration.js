@@ -1,4 +1,4 @@
-import { CONSTS } from "../../consts";
+import { CONSTS } from '../../consts';
 
 export const calculateExpiration = (rollData = {}, flags = {}) => {
     const now = game.time.worldTime;
@@ -11,11 +11,11 @@ export const calculateExpiration = (rollData = {}, flags = {}) => {
         case CONSTS.deletionOptions.endOfTurn:
             return {
                 at: now,
-                initiative: game?.combat?.combatant?.initiative || 99,
+                initiative: game?.combat?.combatant?.initiative || 99
             };
         case CONSTS.deletionOptions.timespan:
             let units = flags[CONSTS.flags.deletionUnit] || 0;
-            units = !isNaN(+units) ? +units : RollPF.safeRoll(units, rollData)._total;
+            units = !isNaN(+units) ? +units : RollPF.safeRollSync(units, rollData)._total;
             const interval = flags[CONSTS.flags.deletionInterval] || CONSTS.deletionIntervals.rounds;
 
             const duration = (() => {
@@ -25,13 +25,13 @@ export const calculateExpiration = (rollData = {}, flags = {}) => {
                     case CONSTS.deletionIntervals.minutes:
                         return units * 60;
                     case CONSTS.deletionIntervals.hours:
-                        return (units * 60) & 60;
+                        return units * 60 & 60;
                 }
             })();
 
             return {
                 at: now + duration,
-                initiative: game?.combat?.combatant?.initiative || 0,
+                initiative: game?.combat?.combatant?.initiative || 0
             };
     }
 };
